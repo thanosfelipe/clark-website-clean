@@ -140,7 +140,7 @@ export default function PartsPage() {
               <div className="text-center mb-16">
                 {/* Main Title with enhanced styling */}
                 <div className="relative inline-block mb-8">
-                  <h1 className="font-open-sans font-regular text-5xl lg:text-7xl text-white mb-2">
+                  <h1 className="font-open-sans font-regular text-4xl sm:text-4xl lg:text-7xl text-white mb-2 text-center">
                     ΑΝΤΑΛΛΑΚΤΙΚΑ &
                     <br />
                     <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent animate-pulse">
