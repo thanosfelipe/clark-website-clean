@@ -71,7 +71,7 @@ function GalleryContent() {
   const [allForklifts, setAllForklifts] = useState<any[]>([])
   const [filteredForklifts, setFilteredForklifts] = useState<any[]>([])
   const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set())
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(false) // Start closed, will be set based on screen size
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
@@ -81,6 +81,22 @@ function GalleryContent() {
   const [mastTypes, setMastTypes] = useState<any[]>([])
   
   const conditions = ["Καινούργιο", "Μεταχειρισμένο"]
+  
+  // Set initial sidebar state based on screen size
+  useEffect(() => {
+    const handleResize = () => {
+      const isMobile = window.innerWidth < 1024 // lg breakpoint
+      setSidebarOpen(!isMobile) // Open on desktop, closed on mobile
+    }
+    
+    // Set initial state
+    handleResize()
+    
+    // Listen for window resize
+    window.addEventListener('resize', handleResize)
+    
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
   
   // Get initial filters from URL parameters
   const getInitialFilters = (): FilterState => {
@@ -235,16 +251,33 @@ function GalleryContent() {
       />
 
       <div className="flex h-screen mt-16">
+        {/* Mobile Overlay */}
+        {sidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
         {/* Filter Sidebar */}
-        <div className={`${sidebarOpen ? 'w-80' : 'w-16'} transition-all duration-300 bg-neutral-800/50 border-r border-neutral-800 backdrop-blur-sm overflow-y-auto`}>
+        <div className={`
+          ${sidebarOpen ? 'w-80' : 'w-16'} 
+          transition-all duration-300 bg-neutral-800/50 border-r border-neutral-800 backdrop-blur-sm overflow-y-auto
+          lg:relative lg:z-auto
+          fixed lg:static top-16 left-0 bottom-0 z-50
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}>
           <div className="p-6">
             {/* Sidebar Toggle */}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="flex items-center justify-center w-full mb-6 p-3 bg-violet-500 rounded-lg hover:bg-violet-600 transition-colors"
+              className={`
+                flex items-center justify-center w-full mb-6 p-3 bg-violet-500 rounded-lg hover:bg-violet-600 transition-colors
+                ${!sidebarOpen ? 'lg:w-auto lg:h-10 lg:aspect-square' : ''}
+              `}
             >
               {/* Filter Icon */}
-              <span className="text-white text-lg font-mono">≡</span>
+              <FunnelIcon className="w-5 h-5 text-white" />
               {sidebarOpen && <span className="ml-2 font-medium">Φίλτρα</span>}
             </button>
 
@@ -400,7 +433,7 @@ function GalleryContent() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto w-full lg:w-auto">
           <div className="p-8">
             {/* Header */}
             <AnimatedSection animation="fadeIn" className="mb-8" pageId="gallery">
@@ -616,6 +649,16 @@ function GalleryContent() {
           </div>
         </div>
       </div>
+
+      {/* Mobile Floating Filter Button */}
+      {!sidebarOpen && (
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="fixed bottom-6 right-6 lg:hidden z-50 w-14 h-14 bg-violet-500 rounded-full shadow-lg flex items-center justify-center hover:bg-violet-600 transition-colors"
+        >
+          <FunnelIcon className="w-6 h-6 text-white" />
+        </button>
+      )}
     </div>
   )
 }
