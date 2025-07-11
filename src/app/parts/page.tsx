@@ -5,7 +5,7 @@ import Navigation from "../components/Navigation";
 import AnimatedSection from "../components/AnimatedSection";
 import SpotlightCard from "../components/SpotlightCard/SpotlightCard";
 import { Particles } from "../components/ui/particles";
-import { RainbowButton } from "../components/ui/rainbow-button";
+
 import { 
   Cog, 
   Thermometer, 
@@ -216,11 +216,12 @@ export default function PartsPage() {
                 {/* Call to Action Button */}
                 <div className="mt-12 flex justify-center">
                   <AnimatedSection animation="scaleIn" delay={1200} pageId="parts">
-                    <a href="/gallery">
-                      <RainbowButton>
-                        <Car className="w-4 h-4 mr-2" />
-                        Δείτε τα Κλαρκ μας
-                      </RainbowButton>
+                    <a 
+                      href="/gallery"
+                      className="inline-flex items-center justify-center px-8 py-4 text-white bg-gradient-to-br from-slate-900/95 to-slate-950/95 border border-slate-700/50 rounded-xl shadow-2xl hover:border-slate-600/50 transition-all duration-300 hover:scale-105 font-medium"
+                    >
+                      <Car className="w-4 h-4 mr-2" />
+                      Δείτε τα Κλαρκ μας
                     </a>
                   </AnimatedSection>
                 </div>
