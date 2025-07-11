@@ -71,15 +71,15 @@ export async function getAllForklifts(): Promise<any[]> {
 export async function searchForklifts(filters: SearchFilters): Promise<any[]> {
   try {
     const { data, error } = await supabase.rpc('search_forklifts', {
-      search_term: filters.search_term || null,
-      brand_ids: filters.brand_ids || null,
-      condition_filter: filters.condition_filter || null,
-      fuel_type_ids: filters.fuel_type_ids || null,
-      mast_type_ids: filters.mast_type_ids || null,
-      min_capacity: filters.min_capacity || null,
-      max_capacity: filters.max_capacity || null,
-      min_height: filters.min_height || null,
-      max_height: filters.max_height || null,
+      search_term: filters.search_term || undefined,
+      brand_ids: filters.brand_ids || undefined,
+      condition_filter: filters.condition_filter || undefined,
+      fuel_type_ids: filters.fuel_type_ids || undefined,
+      mast_type_ids: filters.mast_type_ids || undefined,
+      min_capacity: filters.min_capacity || undefined,
+      max_capacity: filters.max_capacity || undefined,
+      min_height: filters.min_height || undefined,
+      max_height: filters.max_height || undefined,
       limit_count: filters.limit_count || 50,
       offset_count: filters.offset_count || 0
     })
@@ -98,7 +98,7 @@ export async function searchForklifts(filters: SearchFilters): Promise<any[]> {
 
 // Fetch filter options - ONLY show options that exist in available forklifts
 export async function getBrands() {
-  const { data, error } = await supabase.rpc('get_available_brands')
+  const { data, error } = await (supabase as any).rpc('get_available_brands')
   
   if (error) {
     // Fallback to regular query if function doesn't exist
@@ -115,7 +115,7 @@ export async function getBrands() {
 }
 
 export async function getFuelTypes() {
-  const { data, error } = await supabase.rpc('get_available_fuel_types')
+  const { data, error } = await (supabase as any).rpc('get_available_fuel_types')
   
   if (error) {
     // Fallback to regular query if function doesn't exist
@@ -132,7 +132,7 @@ export async function getFuelTypes() {
 }
 
 export async function getMastTypes() {
-  const { data, error } = await supabase.rpc('get_available_mast_types')
+  const { data, error } = await (supabase as any).rpc('get_available_mast_types')
   
   if (error) {
     // Fallback to regular query if function doesn't exist
@@ -150,7 +150,7 @@ export async function getMastTypes() {
 
 // Get dynamic capacity range from available forklifts
 export async function getCapacityRange() {
-  const { data, error } = await supabase.rpc('get_available_capacity_range')
+  const { data, error } = await (supabase as any).rpc('get_available_capacity_range')
   
   if (error) {
     console.warn('Failed to get dynamic capacity range:', error)
@@ -163,7 +163,7 @@ export async function getCapacityRange() {
 
 // Get dynamic height range from available forklifts  
 export async function getHeightRange() {
-  const { data, error } = await supabase.rpc('get_available_height_range')
+  const { data, error } = await (supabase as any).rpc('get_available_height_range')
   
   if (error) {
     console.warn('Failed to get dynamic height range:', error)
