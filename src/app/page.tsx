@@ -37,9 +37,9 @@ export default function Home() {
           size={1.5}
         />
         {/* Split Hero Section */}
-        <section className="h-screen w-full flex flex-col lg:flex-row">
+        <section className="min-h-screen w-full flex flex-col lg:flex-row">
           {/* Left Content Section */}
-          <div className="flex-1 flex items-center justify-center px-6 sm:px-12 lg:px-16 xl:px-20">
+          <div className="flex-1 flex items-center justify-center px-6 sm:px-12 lg:px-16 xl:px-20 py-12 lg:py-0 order-2 lg:order-1">
             <div className="max-w-2xl w-full">
               {/* Website Builder Agency Badge */}
               <AnimatedSection animation="slideInUp" delay={200} pageId="home">
@@ -57,7 +57,7 @@ export default function Home() {
 
               {/* Main Heading */}
               <AnimatedSection animation="slideInLeft" delay={400} pageId="home">
-                <h1 className="font-open-sans font-bold text-4xl sm:text-5xl lg:text-6xl xl:text-7xl leading-tight text-white mb-6">
+                <h1 className="font-open-sans font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl leading-tight text-white mb-6">
                   Μετατρέψτε την
                   <br />
                   Επιχείρησή σας
@@ -68,7 +68,7 @@ export default function Home() {
 
               {/* Subheading */}
               <AnimatedSection animation="slideInLeft" delay={600} pageId="home">
-                <p className="font-open-sans text-xl sm:text-2xl text-gray-300 mb-8 leading-relaxed">
+                <p className="font-open-sans text-lg sm:text-xl lg:text-2xl text-gray-300 mb-8 leading-relaxed">
                   Προσφέρουμε ποιοτικά ανταλλακτικά που οδηγούν σε αποτελέσματα. Από εξειδικευμένη 
                   τεχνική υποστήριξη έως γρήγορη παράδοση, βοηθάμε τις επιχειρήσεις να 
                   αντιμετωπίσουν κάθε πρόκληση.
@@ -94,7 +94,7 @@ export default function Home() {
           </div>
 
           {/* Right Visual Section */}
-          <div className="flex-1 flex items-center justify-center p-6 sm:p-12 lg:p-16">
+          <div className="hidden lg:flex flex-1 items-center justify-center p-6 sm:p-12 lg:p-16 pb-12 lg:pb-16 order-1 lg:order-2">
             <AnimatedSection animation="slideInRight" delay={400} className="relative max-w-2xl w-full" pageId="home">
               <div className="flex items-center justify-center">
                 <img 
