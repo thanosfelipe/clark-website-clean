@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
 import { FunnelIcon } from '@heroicons/react/24/outline'
@@ -64,7 +64,8 @@ interface ForkliftData {
   total_images: number
 }
 
-export default function Gallery() {
+// Main Gallery component that uses useSearchParams
+function GalleryContent() {
   const searchParams = useSearchParams()
   
   const [allForklifts, setAllForklifts] = useState<any[]>([])
@@ -617,4 +618,13 @@ export default function Gallery() {
       </div>
     </div>
   )
-} 
+}
+
+// Main Gallery component with Suspense boundary
+export default function Gallery() {
+  return (
+    <Suspense fallback={<GallerySkeleton />}>
+      <GalleryContent />
+    </Suspense>
+  )
+}
