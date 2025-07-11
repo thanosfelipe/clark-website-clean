@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Quicksand, Nunito, Open_Sans } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 const quicksand = Quicksand({
@@ -33,6 +34,7 @@ export default function RootLayout({
         className={`${quicksand.variable} ${nunito.variable} ${openSans.variable} antialiased`}
       >
         {children}
+        <SpeedInsights />
       </body>
     </html>
   );
