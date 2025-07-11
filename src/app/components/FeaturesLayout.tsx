@@ -15,8 +15,7 @@ const FeaturesLayout = () => {
   }
 
   const handlePartsServiceClick = () => {
-    // Add your desired link here when the page is created
-    console.log('Parts/Service clicked')
+    router.push('/parts')
   }
 
   return (
