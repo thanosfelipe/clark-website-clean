@@ -23,6 +23,19 @@ const AnimatedSection: React.FC<AnimatedSectionProps> = ({
   pageId
 }) => {
   const [hasAnimated, setHasAnimated] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  
+  // Check if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024) // lg breakpoint
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
   
   // Generate unique key for this animation
   const animationKey = pageId ? `animation_${pageId}_${animation}_${delay}` : null
@@ -49,6 +62,18 @@ const AnimatedSection: React.FC<AnimatedSectionProps> = ({
   }, [isVisible, hasAnimated, animationKey])
 
   const variant = animationVariants[animation]
+  
+  // If mobile, always show final state (no animations)
+  if (isMobile) {
+    return (
+      <div
+        ref={elementRef}
+        className={`${variant.animate} ${className}`}
+      >
+        {children}
+      </div>
+    )
+  }
   
   // If animation has already played, show final state immediately
   const shouldAnimate = animationKey ? (isVisible && !hasAnimated) : isVisible
