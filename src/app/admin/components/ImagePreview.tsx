@@ -9,6 +9,7 @@ import {
   EyeIcon
 } from '@heroicons/react/24/outline'
 import { CheckCircleIcon as CheckCircleIconSolid } from '@heroicons/react/24/solid'
+import { DotsHorizontalIcon } from '@radix-ui/react-icons'
 
 export interface ImageData {
   id?: number
@@ -41,6 +42,7 @@ export default function ImagePreview({
   const [isDeletingImage, setIsDeletingImage] = useState(false)
   const [isSettingPrimary, setIsSettingPrimary] = useState(false)
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set())
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<string | null>(null)
 
   const handleImageError = (imageUrl: string) => {
     setImageErrors(prev => new Set(prev).add(imageUrl))
@@ -174,26 +176,44 @@ export default function ImagePreview({
                     </div>
                   )}
 
-                  {/* Action buttons overlay */}
+                  {/* 3-dot menu for mobile */}
+                  <div className="absolute top-2 right-2 sm:hidden z-20">
+                    <button
+                      type="button"
+                      onClick={() => setMobileMenuOpen(mobileMenuOpen === image.image_url ? null : image.image_url)}
+                      className="p-2 bg-black/60 rounded-full hover:bg-black/80 focus:outline-none"
+                      aria-label="Ενέργειες εικόνας"
+                    >
+                      <DotsHorizontalIcon width={20} height={20} className="text-white" />
+                    </button>
+                  </div>
+                  {/* Action buttons overlay (desktop hover, or mobile menu open) */}
                   {!disabled && !isLoading && (
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-2">
+                    <div
+                      className={`absolute inset-0 bg-black/50 flex items-center justify-center space-x-2 transition-opacity z-10
+                        ${
+                          // Show on desktop hover, or if mobile menu for this image is open
+                          'opacity-0 group-hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-100' +
+                          (mobileMenuOpen === image.image_url ? ' opacity-100' : '')
+                        }
+                      `}
+                    >
                       {/* View button */}
                       {onView && (
                         <button
                           type="button"
-                          onClick={() => handleView(image.image_url)}
+                          onClick={() => { handleView(image.image_url); setMobileMenuOpen(null); }}
                           className="p-2 bg-neutral-800/80 hover:bg-neutral-700 text-white rounded-lg transition-colors"
                           title="Προβολή εικόνας"
                         >
                           <EyeIcon className="w-4 h-4" />
                         </button>
                       )}
-                      
                       {/* Set as primary button */}
                       {!image.is_primary && (
                         <button
                           type="button"
-                          onClick={() => handleSetPrimary(image.image_url)}
+                          onClick={() => { handleSetPrimary(image.image_url); setMobileMenuOpen(null); }}
                           disabled={isSettingPrimary || isLoading}
                           className="p-2 bg-violet-500/80 hover:bg-violet-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center justify-center"
                           title="Ορισμός ως κύρια εικόνα"
@@ -205,11 +225,10 @@ export default function ImagePreview({
                           )}
                         </button>
                       )}
-                      
                       {/* Delete button */}
                       <button
                         type="button"
-                        onClick={() => handleDeleteClick(image.image_url)}
+                        onClick={() => { handleDeleteClick(image.image_url); setMobileMenuOpen(null); }}
                         className="p-2 bg-red-500/80 hover:bg-red-600 text-white rounded-lg transition-colors"
                         title="Διαγραφή εικόνας"
                       >
