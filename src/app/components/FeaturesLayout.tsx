@@ -33,10 +33,10 @@ const FeaturesLayout = () => {
 
         {/* Two Column Layout */}
         <AnimatedSection animation="fadeIn" delay={200} pageId="home">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
+          <div className="grid md:grid-cols-2 gap-6 lg:gap-8 max-w-6xl mx-auto">
             {/* Left Column - Sales/Πωλήσεις */}
             <div onClick={handleSalesClick} className="cursor-pointer group">
-              <div className="relative h-96 rounded-3xl border-[0.75px] border-indigo-800/50 p-2 overflow-hidden transform transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl group-hover:shadow-indigo-500/20">
+              <div className="relative h-80 rounded-2xl border-[0.75px] border-indigo-800/50 p-2 overflow-hidden transform transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl group-hover:shadow-indigo-500/20">
                 <GlowingEffect
                   spread={40}
                   glow={true}
@@ -58,15 +58,15 @@ const FeaturesLayout = () => {
                   />
                   
                   {/* Content positioned at bottom left */}
-                  <div className="relative z-10 p-8">
+                  <div className="relative z-10 p-6">
                     {/* Title */}
-                    <h3 className="font-open-sans font-bold text-4xl lg:text-5xl text-white mb-6 transition-all duration-300 group-hover:text-indigo-200">
+                    <h3 className="font-open-sans font-bold text-2xl lg:text-3xl text-white mb-4 transition-all duration-300 group-hover:text-indigo-200">
                       Πωλήσεις
                     </h3>
 
                     {/* Call to Action */}
                     <div>
-                      <span className="inline-flex items-center px-6 py-3 text-sm font-medium text-white bg-indigo-500/20 border border-indigo-400/50 rounded-lg hover:bg-indigo-500/40 hover:border-indigo-300/90 hover:shadow-lg hover:shadow-indigo-500/25 transition-all duration-200 backdrop-blur-sm transform hover:translate-y-[-2px] group-hover:bg-indigo-500/30">
+                      <span className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-500/20 border border-indigo-400/50 rounded-lg hover:bg-indigo-500/40 hover:border-indigo-300/90 hover:shadow-lg hover:shadow-indigo-500/25 transition-all duration-200 backdrop-blur-sm transform hover:translate-y-[-2px] group-hover:bg-indigo-500/30">
                         Δείτε τα προϊόντα
                         <svg className="ml-2 w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -80,7 +80,7 @@ const FeaturesLayout = () => {
 
             {/* Right Column - Parts/Service */}
             <div onClick={handlePartsServiceClick} className="cursor-pointer group">
-              <div className="relative h-96 rounded-3xl border-[0.75px] border-indigo-800/50 p-2 overflow-hidden transform transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl group-hover:shadow-indigo-500/20">
+              <div className="relative h-80 rounded-2xl border-[0.75px] border-indigo-800/50 p-2 overflow-hidden transform transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl group-hover:shadow-indigo-500/20">
                 <GlowingEffect
                   spread={40}
                   glow={true}
@@ -102,15 +102,15 @@ const FeaturesLayout = () => {
                   />
                   
                   {/* Content positioned at bottom left */}
-                  <div className="relative z-10 p-8">
+                  <div className="relative z-10 p-6">
                     {/* Title */}
-                    <h3 className="font-open-sans font-bold text-4xl lg:text-5xl text-white mb-6 transition-all duration-300 group-hover:text-indigo-200">
+                    <h3 className="font-open-sans font-bold text-2xl lg:text-3xl text-white mb-4 transition-all duration-300 group-hover:text-indigo-200">
                       Ανταλλακτικά/Service
                     </h3>
 
                     {/* Call to Action */}
                     <div>
-                      <span className="inline-flex items-center px-6 py-3 text-sm font-medium text-white bg-indigo-500/20 border border-indigo-400/50 rounded-lg hover:bg-indigo-500/40 hover:border-indigo-300/90 hover:shadow-lg hover:shadow-indigo-500/25 transition-all duration-200 backdrop-blur-sm transform hover:translate-y-[-2px] group-hover:bg-indigo-500/30">
+                      <span className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-500/20 border border-indigo-400/50 rounded-lg hover:bg-indigo-500/40 hover:border-indigo-300/90 hover:shadow-lg hover:shadow-indigo-500/25 transition-all duration-200 backdrop-blur-sm transform hover:translate-y-[-2px] group-hover:bg-indigo-500/30">
                         Μάθετε περισσότερα
                         <svg className="ml-2 w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
