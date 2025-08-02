@@ -133,7 +133,7 @@ export default function PartsPage() {
         />
 
         {/* Header Section */}
-        <section className="pt-24 pb-20 px-6 sm:px-12 lg:px-16 xl:px-20 relative overflow-hidden">
+        <section className="pt-24 pb-12 px-6 sm:px-12 lg:px-16 xl:px-20 relative overflow-hidden">
           
           <div className="max-w-7xl mx-auto relative">
             <AnimatedSection animation="scaleIn" delay={200} pageId="parts">
@@ -217,11 +217,11 @@ export default function PartsPage() {
                 <div className="mt-12 flex justify-center">
                   <AnimatedSection animation="scaleIn" delay={1200} pageId="parts">
                     <a 
-                      href="/gallery"
+                      href="/contact"
                       className="inline-flex items-center justify-center px-8 py-4 text-white bg-gradient-to-br from-slate-900/95 to-slate-950/95 border border-slate-700/50 rounded-xl shadow-2xl hover:border-slate-600/50 transition-all duration-300 hover:scale-105 font-medium"
                     >
                       <Car className="w-4 h-4 mr-2" />
-                      Δείτε τα Κλαρκ μας
+                      Επικοινωνήστε μαζί μας
                     </a>
                   </AnimatedSection>
                 </div>
@@ -230,109 +230,6 @@ export default function PartsPage() {
             </AnimatedSection>
           </div>
         </section>
-
-        {/* Main Content Section */}
-        <section className="pb-20 px-6 sm:px-12 lg:px-16 xl:px-20">
-          <div className="max-w-7xl mx-auto">
-            <div className="grid lg:grid-cols-2 gap-16 items-start">
-              
-              {/* Left Side - Images */}
-              <div className="space-y-8">
-                <AnimatedSection animation="scaleIn" delay={400} pageId="parts">
-                  <Image
-                    src="/fourthpicParts.png"
-                    alt="Ανταλλακτικά Κλαρκ"
-                    width={500}
-                    height={400}
-                    className="w-full h-auto rounded-lg"
-                  />
-                </AnimatedSection>
-
-                <AnimatedSection animation="scaleIn" delay={600} pageId="parts">
-                  <Image
-                    src="/secondpicPart.png"
-                    alt="Ανταλλακτικά & Αναλώσιμα"
-                    width={500}
-                    height={400}
-                    className="w-full h-auto rounded-lg"
-                  />
-                </AnimatedSection>
-
-                <AnimatedSection animation="scaleIn" delay={800} pageId="parts">
-                  <Image
-                    src="/thirdpicParts.png"
-                    alt="Ποιότητα Προϊόντων"
-                    width={500}
-                    height={300}
-                    className="w-full h-auto rounded-lg"
-                  />
-                </AnimatedSection>
-
-                <AnimatedSection animation="scaleIn" delay={1000} pageId="parts">
-                  <Image
-                    src="/fourthpicParts.png"
-                    alt="Ανταλλακτικά & Εξαρτήματα"
-                    width={500}
-                    height={400}
-                    className="w-full h-auto rounded-lg"
-                  />
-                </AnimatedSection>
-
-                <AnimatedSection animation="scaleIn" delay={1200} pageId="parts">
-                  <Image
-                    src="/fourthpicParts.png"
-                    alt="Προϊόντα Υψηλής Ποιότητας"
-                    width={500}
-                    height={400}
-                    className="w-full h-auto rounded-lg"
-                  />
-                </AnimatedSection>
-              </div>
-
-              {/* Right Side - Categories */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {categories.map((category, index) => {
-                  const IconComponent = category.icon;
-                  return (
-                    <AnimatedSection 
-                      key={index} 
-                      animation="scaleIn" 
-                      delay={400 + (index * 50)}
-                      pageId="parts"
-                    >
-                      <SpotlightCard 
-                        className="h-full min-h-[300px] flex flex-col bg-gradient-to-br from-slate-900/95 to-slate-950/95 border border-slate-700/50 shadow-2xl"
-                        spotlightColor={category.spotlightColor as `rgba(${number}, ${number}, ${number}, ${number})`}
-                      >
-                        {/* Icon */}
-                        <div className="mb-6 flex-shrink-0">
-                          <div className="w-12 h-12 bg-indigo-500/20 rounded-xl flex items-center justify-center">
-                            <IconComponent className="w-6 h-6 text-indigo-400" />
-                          </div>
-                        </div>
-                        
-                        {/* Title */}
-                        <h3 className="font-open-sans font-medium text-xl text-white mb-4 flex-shrink-0">
-                          {category.title}
-                        </h3>
-                        
-                        {/* Content */}
-                        {category.items.length > 0 && (
-                          <div className="flex-grow">
-                            <p className="font-open-sans text-base text-neutral-300 leading-relaxed">
-                              {category.items.join(' · ')}
-                            </p>
-                          </div>
-                        )}
-                      </SpotlightCard>
-                    </AnimatedSection>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </section>
-
 
       </div>
     </>
