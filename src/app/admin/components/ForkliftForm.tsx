@@ -184,23 +184,45 @@ export default function ForkliftForm({
     }
   }, [initialData, isEditing])
 
-  // Filter subcategories based on selected category
+  // Set up filtered subcategories to use fuel types values
   useEffect(() => {
-    if (formData.category_id) {
-      const filtered = options.subcategories.filter(
-        sub => sub.category_id === Number(formData.category_id)
-      )
-      setFilteredSubcategories(filtered)
-      
-      // Reset subcategory if it doesn't belong to new category
-      if (formData.subcategory_id && !filtered.find(sub => sub.id === Number(formData.subcategory_id))) {
-        setFormData(prev => ({ ...prev, subcategory_id: '' }))
-      }
+    // Use fuel types as subcategory options instead of actual subcategories
+    setFilteredSubcategories(
+      options.fuelTypes.map(fuelType => ({
+        id: fuelType.id,
+        name: fuelType.name,
+        category_id: 1 // Dummy category ID since we're using fuel types
+      }))
+    )
+  }, [options.fuelTypes])
+
+  // Sync fuel type with subcategory selection
+  useEffect(() => {
+    if (formData.subcategory_id) {
+      // When subcategory changes, automatically set the same fuel type
+      // Since subcategories are now based on fuel types, they have the same ID
+      setFormData(prev => ({ 
+        ...prev, 
+        fuel_type_id: prev.subcategory_id 
+      }))
     } else {
-      setFilteredSubcategories([])
-      setFormData(prev => ({ ...prev, subcategory_id: '' }))
+      // Clear fuel type when subcategory is cleared
+      setFormData(prev => ({ 
+        ...prev, 
+        fuel_type_id: '' 
+      }))
     }
-  }, [formData.category_id, options.subcategories])
+  }, [formData.subcategory_id])
+
+  // Auto-select "Κλαρκ" category if it exists
+  useEffect(() => {
+    if (options.categories.length > 0 && !isEditing) {
+      const clarkCategory = options.categories.find(cat => cat.name === 'Κλαρκ')
+      if (clarkCategory && !formData.category_id) {
+        setFormData(prev => ({ ...prev, category_id: clarkCategory.id }))
+      }
+    }
+  }, [options.categories, formData.category_id, isEditing])
 
   const handleInputChange = (
     field: keyof ForkliftFormData, 
@@ -224,8 +246,15 @@ export default function ForkliftForm({
     if (!formData.brand_id) {
       newErrors.brand_id = 'Η μάρκα είναι υποχρεωτική'
     }
+    // Category validation - should be auto-selected to "Κλαρκ"
     if (!formData.category_id) {
-      newErrors.category_id = 'Η κατηγορία είναι υποχρεωτική'
+      // Try to auto-select "Κλαρκ" category if it exists
+      const clarkCategory = options.categories.find(cat => cat.name === 'Κλαρκ')
+      if (clarkCategory) {
+        setFormData(prev => ({ ...prev, category_id: clarkCategory.id }))
+      } else {
+        newErrors.category_id = 'Η κατηγορία "Κλαρκ" δεν βρέθηκε στη βάση δεδομένων'
+      }
     }
     if (!formData.subcategory_id) {
       newErrors.subcategory_id = 'Η υποκατηγορία είναι υποχρεωτική'
@@ -482,35 +511,23 @@ export default function ForkliftForm({
           {errors.brand_id && <p className="mt-1 text-sm text-red-400">{errors.brand_id}</p>}
         </div>
 
-        {/* Category */}
+        {/* Category - Fixed to "Κλαρκ" */}
         <div>
           <label htmlFor="category_id" className="block text-sm font-medium text-neutral-300 mb-2">
             Κατηγορία *
           </label>
-          <select
-            id="category_id"
-            value={formData.category_id}
-            onChange={(e) => handleInputChange('category_id', e.target.value ? Number(e.target.value) : '')}
-            className={`w-full px-3 py-2 bg-neutral-700 border rounded-md text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition-colors ${
-              errors.category_id ? 'border-red-500' : 'border-neutral-600'
-            }`}
-            disabled={isLoading}
-          >
-            <option value="">Επιλέξτε κατηγορία</option>
-            {options.categories.map(category => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
+          <div className="w-full px-3 py-2 bg-neutral-600 border border-neutral-500 rounded-md text-white">
+            Κλαρκ
+          </div>
+          <p className="mt-1 text-xs text-neutral-400">Η κατηγορία είναι προεπιλεγμένη για τη διαχείριση κλαρκ</p>
           {errors.category_id && <p className="mt-1 text-sm text-red-400">{errors.category_id}</p>}
         </div>
       </div>
 
-      {/* Subcategory */}
+      {/* Subcategory - Uses Fuel Types values */}
       <div>
         <label htmlFor="subcategory_id" className="block text-sm font-medium text-neutral-300 mb-2">
-          Υποκατηγορία *
+          Υποκατηγορία * (Τύπος Καυσίμου)
         </label>
         <select
           id="subcategory_id"
@@ -519,7 +536,7 @@ export default function ForkliftForm({
           className={`w-full px-3 py-2 bg-neutral-700 border rounded-md text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition-colors ${
             errors.subcategory_id ? 'border-red-500' : 'border-neutral-600'
           }`}
-          disabled={isLoading || !formData.category_id}
+          disabled={isLoading}
         >
           <option value="">Επιλέξτε υποκατηγορία</option>
           {filteredSubcategories.map(subcategory => (
@@ -529,9 +546,7 @@ export default function ForkliftForm({
           ))}
         </select>
         {errors.subcategory_id && <p className="mt-1 text-sm text-red-400">{errors.subcategory_id}</p>}
-        {!formData.category_id && (
-          <p className="mt-1 text-sm text-neutral-500">Επιλέξτε πρώτα μια κατηγορία</p>
-        )}
+        <p className="mt-1 text-xs text-neutral-400">Οι υποκατηγορίες βασίζονται στους τύπους καυσίμου</p>
       </div>
 
       {/* Condition and Model Year Row */}
@@ -581,25 +596,25 @@ export default function ForkliftForm({
 
       {/* Fuel Type and Lifting Capacity Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Fuel Type */}
+        {/* Fuel Type - Auto-synced with Subcategory */}
         <div>
           <label htmlFor="fuel_type_id" className="block text-sm font-medium text-neutral-300 mb-2">
             Τύπος Καυσίμου
           </label>
-          <select
-            id="fuel_type_id"
-            value={formData.fuel_type_id}
-            onChange={(e) => handleInputChange('fuel_type_id', e.target.value ? Number(e.target.value) : '')}
-            className="w-full px-3 py-2 bg-neutral-700 border border-neutral-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition-colors"
-            disabled={isLoading}
-          >
-            <option value="">Επιλέξτε τύπο καυσίμου</option>
-            {options.fuelTypes.map(fuelType => (
-              <option key={fuelType.id} value={fuelType.id}>
-                {fuelType.name}
-              </option>
-            ))}
-          </select>
+          <div className={`w-full px-3 py-2 rounded-md text-white ${
+            formData.fuel_type_id 
+              ? 'bg-neutral-600 border border-neutral-500' 
+              : 'bg-neutral-700 border border-neutral-600'
+          }`}>
+            {formData.fuel_type_id ? (
+              options.fuelTypes.find(ft => ft.id === Number(formData.fuel_type_id))?.name || 'Δεν βρέθηκε'
+            ) : (
+              <span className="text-neutral-400">Επιλέξτε πρώτα υποκατηγορία</span>
+            )}
+          </div>
+          <p className="mt-1 text-xs text-neutral-400">
+            Ο τύπος καυσίμου ορίζεται αυτόματα βάσει της υποκατηγορίας
+          </p>
         </div>
 
         {/* Lifting Capacity */}

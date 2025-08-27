@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { getCurrentUser, type AdminUser } from '@/lib/auth'
+import { getCurrentUser, onAuthStateChange, updateLastActivity, type AdminUser } from '@/lib/auth'
 import AdminSidebar from './components/AdminSidebar'
 import AdminHeader from './components/AdminHeader'
+import SessionTimeoutWarning from './components/SessionTimeoutWarning'
 
 export default function AdminLayout({
   children,
@@ -42,7 +43,49 @@ export default function AdminLayout({
     }
 
     checkAuth()
+
+    // Set up auth state change listener with automatic logout
+    const { data: authListener } = onAuthStateChange((user) => {
+      if (!user && !isLoginPage) {
+        setUser(null)
+        router.push('/admin/login')
+      } else if (user) {
+        setUser(user)
+      }
+    })
+
+    // Clean up listener on unmount
+    return () => {
+      authListener?.subscription?.unsubscribe()
+    }
   }, [router, isLoginPage])
+
+  // Track activity for session timeout
+  useEffect(() => {
+    if (!isLoginPage && user) {
+      // Update activity on mount
+      updateLastActivity()
+
+      // Set up activity tracking
+      const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart']
+      
+      const handleActivity = () => {
+        updateLastActivity()
+      }
+
+      // Add event listeners
+      activityEvents.forEach(event => {
+        document.addEventListener(event, handleActivity, true)
+      })
+
+      // Clean up event listeners
+      return () => {
+        activityEvents.forEach(event => {
+          document.removeEventListener(event, handleActivity, true)
+        })
+      }
+    }
+  }, [isLoginPage, user])
 
   // Show loading screen while checking authentication
   if (isLoading && !isLoginPage) {
@@ -68,6 +111,12 @@ export default function AdminLayout({
 
   return (
     <div className="h-screen bg-neutral-900 flex overflow-hidden">
+      {/* Session timeout warning */}
+      <SessionTimeoutWarning onLogout={() => {
+        setUser(null)
+        router.push('/admin/login')
+      }} />
+      
       {/* Sidebar */}
       <AdminSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
       

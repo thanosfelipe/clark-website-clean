@@ -1,16 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { brandQueries, validation, DatabaseError } from '@/lib/admin-queries'
 
-// GET /api/admin/brands - Get all brands
-export async function GET() {
+// GET /api/admin/brands - Get all brands OR get single brand by ID
+export async function GET(request: NextRequest) {
   try {
-    const brands = await brandQueries.getAll()
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
     
-    return NextResponse.json({
-      success: true,
-      data: brands,
-      message: 'Οι μάρκες ανακτήθηκαν επιτυχώς'
-    })
+    if (id) {
+      // Get single brand by ID
+      const brandId = parseInt(id)
+      if (isNaN(brandId)) {
+        return NextResponse.json({
+          success: false,
+          error: 'Invalid ID',
+          message: 'Μη έγκυρο ID'
+        }, { status: 400 })
+      }
+      
+      const brand = await brandQueries.getById(brandId)
+      if (!brand) {
+        return NextResponse.json({
+          success: false,
+          error: 'Not found',
+          message: 'Η μάρκα δεν βρέθηκε'
+        }, { status: 404 })
+      }
+      
+      return NextResponse.json({
+        success: true,
+        data: brand,
+        message: 'Η μάρκα ανακτήθηκε επιτυχώς'
+      })
+    } else {
+      // Get all brands
+      const brands = await brandQueries.getAll()
+      
+      return NextResponse.json({
+        success: true,
+        data: brands,
+        message: 'Οι μάρκες ανακτήθηκαν επιτυχώς'
+      })
+    }
   } catch (error) {
     console.error('Error fetching brands:', error)
     
@@ -87,18 +118,30 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PUT /api/admin/brands - Update brand (expects ID in body)
+// PUT /api/admin/brands - Update brand (expects ID in query params)
 export async function PUT(request: NextRequest) {
   try {
-    const body = await request.json()
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
     
-    if (!body.id) {
+    if (!id) {
       return NextResponse.json({
         success: false,
         error: 'Missing ID',
         message: 'Το ID είναι υποχρεωτικό'
       }, { status: 400 })
     }
+    
+    const brandId = parseInt(id)
+    if (isNaN(brandId)) {
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid ID',
+        message: 'Μη έγκυρο ID'
+      }, { status: 400 })
+    }
+    
+    const body = await request.json()
     
     // Validate input data
     const validationErrors = validation.validateBrand(body)
@@ -112,7 +155,7 @@ export async function PUT(request: NextRequest) {
     }
     
     // Check if brand exists
-    const existingBrand = await brandQueries.getById(body.id)
+    const existingBrand = await brandQueries.getById(brandId)
     if (!existingBrand) {
       return NextResponse.json({
         success: false,
@@ -123,7 +166,7 @@ export async function PUT(request: NextRequest) {
     
     // Check if new name conflicts with other brands
     if (body.name && body.name !== existingBrand.name) {
-      const nameExists = await brandQueries.nameExists(body.name, body.id)
+      const nameExists = await brandQueries.nameExists(body.name, brandId)
       if (nameExists) {
         return NextResponse.json({
           success: false,
@@ -134,7 +177,7 @@ export async function PUT(request: NextRequest) {
     }
     
     // Update the brand
-    const updatedBrand = await brandQueries.update(body.id, {
+    const updatedBrand = await brandQueries.update(brandId, {
       name: body.name?.trim(),
       logo_url: body.logo_url?.trim() || null
     })

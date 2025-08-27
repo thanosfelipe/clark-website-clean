@@ -58,6 +58,10 @@ export async function loginAdmin(credentials: LoginCredentials): Promise<AuthRes
       return { success: false, error: 'Δεν έχετε δικαίωμα πρόσβασης στο admin panel' }
     }
 
+    // Initialize session tracking
+    setLoginTime()
+    updateLastActivity()
+
     return { 
       success: true, 
       user: {
@@ -75,6 +79,8 @@ export async function loginAdmin(credentials: LoginCredentials): Promise<AuthRes
 
 // Logout function
 export async function logoutAdmin(): Promise<void> {
+  stopActivityMonitoring()
+  clearSessionStorage()
   await supabaseAuth.auth.signOut()
 }
 
@@ -84,6 +90,12 @@ export async function getCurrentUser(): Promise<AdminUser | null> {
     const { data: { session } } = await supabaseAuth.auth.getSession()
     
     if (!session?.user) {
+      return null
+    }
+
+    // Check if session has expired
+    if (isSessionExpired()) {
+      await logoutAdmin()
       return null
     }
 
@@ -99,6 +111,9 @@ export async function getCurrentUser(): Promise<AdminUser | null> {
       await logoutAdmin()
       return null
     }
+
+    // Update activity on successful auth check
+    updateLastActivity()
 
     return {
       id: adminUser.id.toString(),
@@ -118,13 +133,108 @@ export async function isAuthenticated(): Promise<boolean> {
   return user !== null
 }
 
-// Client-side session management
+// Session timeout configuration (30 minutes)
+const SESSION_TIMEOUT = 30 * 60 * 1000 // 30 minutes in milliseconds
+const ACTIVITY_CHECK_INTERVAL = 60 * 1000 // Check every minute
+const LOCAL_STORAGE_KEYS = {
+  LAST_ACTIVITY: 'admin_last_activity',
+  LOGIN_TIME: 'admin_login_time'
+}
+
+// Activity tracking
+let activityCheckInterval: NodeJS.Timeout | null = null
+let lastActivity = Date.now()
+
+// Update last activity timestamp
+export function updateLastActivity(): void {
+  lastActivity = Date.now()
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(LOCAL_STORAGE_KEYS.LAST_ACTIVITY, lastActivity.toString())
+  }
+}
+
+// Get last activity timestamp
+function getLastActivity(): number {
+  if (typeof window === 'undefined') return Date.now()
+  
+  const stored = localStorage.getItem(LOCAL_STORAGE_KEYS.LAST_ACTIVITY)
+  return stored ? parseInt(stored, 10) : Date.now()
+}
+
+// Check if session has expired
+export function isSessionExpired(): boolean {
+  const lastAct = getLastActivity()
+  const now = Date.now()
+  return (now - lastAct) > SESSION_TIMEOUT
+}
+
+// Set login timestamp
+function setLoginTime(): void {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(LOCAL_STORAGE_KEYS.LOGIN_TIME, Date.now().toString())
+  }
+}
+
+// Clear session storage
+function clearSessionStorage(): void {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem(LOCAL_STORAGE_KEYS.LAST_ACTIVITY)
+    localStorage.removeItem(LOCAL_STORAGE_KEYS.LOGIN_TIME)
+  }
+}
+
+// Start activity monitoring
+function startActivityMonitoring(onTimeout: () => void): void {
+  if (activityCheckInterval) {
+    clearInterval(activityCheckInterval)
+  }
+
+  activityCheckInterval = setInterval(() => {
+    if (isSessionExpired()) {
+      stopActivityMonitoring()
+      onTimeout()
+    }
+  }, ACTIVITY_CHECK_INTERVAL)
+
+  // Track user activity
+  if (typeof window !== 'undefined') {
+    const activities = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart']
+    
+    const handleActivity = () => {
+      updateLastActivity()
+    }
+
+    activities.forEach(activity => {
+      document.addEventListener(activity, handleActivity, true)
+    })
+  }
+}
+
+// Stop activity monitoring
+function stopActivityMonitoring(): void {
+  if (activityCheckInterval) {
+    clearInterval(activityCheckInterval)
+    activityCheckInterval = null
+  }
+}
+
+// Client-side session management with timeout
 export function onAuthStateChange(callback: (user: AdminUser | null) => void) {
   return supabaseAuth.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN' && session?.user) {
       const user = await getCurrentUser()
+      if (user) {
+        setLoginTime()
+        updateLastActivity()
+        startActivityMonitoring(async () => {
+          await logoutAdmin()
+          callback(null)
+        })
+      }
       callback(user)
     } else if (event === 'SIGNED_OUT') {
+      stopActivityMonitoring()
+      clearSessionStorage()
       callback(null)
     }
   })
