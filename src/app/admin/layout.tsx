@@ -31,12 +31,19 @@ export default function AdminLayout({
       try {
         const currentUser = await getCurrentUser()
         if (!currentUser) {
-          router.push('/admin/login')
+          console.log('No current user found, redirecting to login')
+          setUser(null)
+          setIsLoading(false)
+          router.replace('/admin/login')
           return
         }
         setUser(currentUser)
       } catch (error) {
-        router.push('/admin/login')
+        console.error('Error checking auth:', error)
+        setUser(null)
+        setIsLoading(false)
+        router.replace('/admin/login')
+        return
       } finally {
         setIsLoading(false)
       }
@@ -47,9 +54,11 @@ export default function AdminLayout({
     // Set up auth state change listener with automatic logout
     const { data: authListener } = onAuthStateChange((user) => {
       if (!user && !isLoginPage) {
+        console.log('Auth state changed: user logged out')
         setUser(null)
-        router.push('/admin/login')
-      } else if (user) {
+        router.replace('/admin/login')
+      } else if (user && !isLoginPage) {
+        console.log('Auth state changed: user logged in')
         setUser(user)
       }
     })
