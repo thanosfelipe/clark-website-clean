@@ -90,12 +90,16 @@ export async function getCurrentUser(): Promise<AdminUser | null> {
     const { data: { session } } = await supabaseAuth.auth.getSession()
     
     if (!session?.user) {
+      console.log('No session found')
       return null
     }
 
     // Check if session has expired
     if (isSessionExpired()) {
-      await logoutAdmin()
+      console.log('Session expired, logging out')
+      // Clear storage immediately but don't call full logout to avoid loops
+      clearSessionStorage()
+      await supabaseAuth.auth.signOut()
       return null
     }
 
@@ -108,7 +112,10 @@ export async function getCurrentUser(): Promise<AdminUser | null> {
       .single()
 
     if (error || !adminUser) {
-      await logoutAdmin()
+      console.log('User not found in admin_users or not active:', error?.message)
+      // Clear storage and sign out
+      clearSessionStorage()
+      await supabaseAuth.auth.signOut()
       return null
     }
 
@@ -122,7 +129,8 @@ export async function getCurrentUser(): Promise<AdminUser | null> {
       role: adminUser.role || 'admin',
       is_active: adminUser.is_active || false
     }
-  } catch {
+  } catch (error) {
+    console.error('Error in getCurrentUser:', error)
     return null
   }
 }
@@ -163,6 +171,9 @@ function getLastActivity(): number {
 
 // Check if session has expired
 export function isSessionExpired(): boolean {
+  // If we're on the server side or localStorage is not available, don't consider it expired
+  if (typeof window === 'undefined') return false
+  
   const lastAct = getLastActivity()
   const now = Date.now()
   return (now - lastAct) > SESSION_TIMEOUT
