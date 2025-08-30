@@ -29,12 +29,7 @@ interface NavItem {
 const navigation: NavItem[] = [
   { name: 'Dashboard', href: '/admin', icon: HomeIcon, label: 'Dashboard' },
   { name: 'Κλαρκ', href: '/admin/forklifts', icon: TruckIcon, label: 'Κλαρκ' },
-  { name: 'Μάρκες', href: '/admin/brands', icon: TagIcon, label: 'Μάρκες' },
-  { name: 'Κατηγορίες', href: '/admin/categories', icon: RectangleStackIcon, label: 'Κατηγορίες' },
-  { name: 'Υποκατηγορίες', href: '/admin/subcategories', icon: CubeIcon, label: 'Υποκατηγορίες' },
-  { name: 'Τύποι Καυσίμου', href: '/admin/fuel-types', icon: FireIcon, label: 'Καύσιμα' },
-  { name: 'Τύποι Ιστού', href: '/admin/mast-types', icon: CubeIcon, label: 'Ιστοί' },
-  { name: 'Analytics', href: '/admin/analytics', icon: ChartBarIcon, label: 'Analytics' }
+  { name: 'Μάρκες', href: '/admin/brands', icon: TagIcon, label: 'Μάρκες' }
 ]
 
 export default function AdminSidebar({ isOpen, setIsOpen }: AdminSidebarProps) {

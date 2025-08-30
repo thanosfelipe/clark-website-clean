@@ -75,17 +75,14 @@ export default function AddForkliftPage() {
       console.log('Forklift created:', createdForklift)
 
       // Step 2: Upload images if any were selected
+      let imageUploadSuccess = true
       if (formData.selectedImages && formData.selectedImages.length > 0) {
+        console.log(`Starting upload of ${formData.selectedImages.length} images for forklift ID ${createdForklift.id}`)
+        
         try {
-          console.log(`Uploading ${formData.selectedImages.length} images for forklift ID ${createdForklift.id}`)
-          console.log('Selected images details:', formData.selectedImages.map(img => ({
-            fileName: img.file.name,
-            fileSize: img.file.size,
-            isPrimary: img.is_primary,
-            sortOrder: img.sort_order
-          })))
-          
           const files = formData.selectedImages.map(img => img.file)
+          
+          // Upload images to storage
           const uploadResults = await uploadMultipleImages(
             files,
             createdForklift.id,
@@ -94,9 +91,9 @@ export default function AddForkliftPage() {
             }
           )
 
-          console.log('Images uploaded successfully:', uploadResults)
+          console.log('Images uploaded to storage successfully:', uploadResults.length)
 
-          // Update forklift with image data via API
+          // Save image metadata to database
           const imagePayload = {
             forklift_id: createdForklift.id,
             images: uploadResults.map((result, index) => ({
@@ -107,7 +104,7 @@ export default function AddForkliftPage() {
             }))
           }
 
-          console.log('Sending image payload to API:', imagePayload)
+          console.log('Saving image metadata to database:', imagePayload)
 
           const imageResponse = await fetch('/api/admin/forklift-images', {
             method: 'POST',
@@ -117,27 +114,49 @@ export default function AddForkliftPage() {
             body: JSON.stringify(imagePayload)
           })
 
+          if (!imageResponse.ok) {
+            throw new Error(`HTTP ${imageResponse.status}: ${imageResponse.statusText}`)
+          }
+
           const imageResult = await imageResponse.json()
-          console.log('Image API response:', imageResult)
+          console.log('Image metadata save result:', imageResult)
           
           if (!imageResult.success) {
-            console.warn('Warning: Forklift created but images could not be saved:', imageResult.message)
+            console.warn('Warning: Images uploaded but metadata could not be saved:', imageResult.message)
+            imageUploadSuccess = false
+          } else {
+            console.log('All image operations completed successfully')
           }
 
         } catch (imageError) {
-          console.error('Error uploading images:', imageError)
-          // Don't fail the entire operation if image upload fails
-          // The forklift was already created successfully
-        } finally {
-          // Clean up object URLs
-          formData.selectedImages.forEach(img => URL.revokeObjectURL(img.preview))
+          console.error('Error in image upload process:', imageError)
+          imageUploadSuccess = false
+          // Don't fail the entire operation - forklift was created successfully
+        }
+        
+        // Clean up object URLs regardless of success/failure
+        try {
+          formData.selectedImages.forEach(img => {
+            if (img.preview && img.preview.startsWith('blob:')) {
+              URL.revokeObjectURL(img.preview)
+            }
+          })
+        } catch (cleanupError) {
+          console.warn('Error cleaning up object URLs:', cleanupError)
         }
       } else {
         console.log('No images selected for upload')
       }
 
-      // Navigate back to list with success message
-      router.push('/admin/forklifts?message=Το κλαρκ προστέθηκε επιτυχώς')
+      // Navigate back to list with appropriate message
+      const message = imageUploadSuccess 
+        ? 'Το κλαρκ προστέθηκε επιτυχώς μαζί με τις εικόνες'
+        : formData.selectedImages && formData.selectedImages.length > 0
+          ? 'Το κλαρκ προστέθηκε επιτυχώς αλλά υπήρξε πρόβλημα με τις εικόνες'
+          : 'Το κλαρκ προστέθηκε επιτυχώς'
+      
+      console.log('Redirecting to forklift list with message:', message)
+      router.push(`/admin/forklifts?message=${encodeURIComponent(message)}`)
 
     } catch (err) {
       console.error('Error creating forklift:', err)

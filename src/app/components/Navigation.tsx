@@ -40,30 +40,7 @@ const Navigation = () => {
       }
     },
     { title: 'ΑΝΤΑΛΛΑΚΤΙΚΑ', href: '/parts' },
-    { 
-      title: 'ΕΤΑΙΡΕΙΑ', 
-      href: '#',
-      dropdown: {
-        sections: [
-          {
-            title: 'Σχετικά με εμάς',
-            items: [
-              { title: 'Η Ιστορία μας', href: '#' },
-              { title: 'Αξίες & Αρχές', href: '#' },
-              { title: 'Κοινωνική Ευθύνη', href: '#' }
-            ]
-          },
-          {
-            title: 'Συνεργασία',
-            items: [
-              { title: 'Γίνε Συνεργάτης', href: '#' },
-              { title: 'Προμηθευτές', href: '#' },
-              { title: 'Καριέρα', href: '#' }
-            ]
-          }
-        ]
-      }
-    },
+    { title: 'ΕΤΑΙΡΕΙΑ', href: '/aboutUs' },
     { title: 'ΕΠΙΚΟΙΝΩΝΙΑ', href: '/contact' }
   ]
 

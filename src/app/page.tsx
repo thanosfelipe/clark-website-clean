@@ -85,9 +85,12 @@ export default function Home() {
                     Δείτε τα προϊόντα
                     <img src="/forklift.png" alt="Forklift" className="ml-2 w-6 h-6" />
                   </a>
-                  <button className="inline-flex items-center justify-center px-8 py-4 text-base font-medium text-gray-300 bg-transparent border border-indigo-800 rounded-lg shadow-md hover:bg-indigo-900/30 transition-all duration-300">
+                  <a 
+                    href="/aboutUs"
+                    className="inline-flex items-center justify-center px-8 py-4 text-base font-medium text-gray-300 bg-transparent border border-indigo-800 rounded-lg shadow-md hover:bg-indigo-900/30 transition-all duration-300"
+                  >
                     Μάθετε περισσότερα
-                  </button>
+                  </a>
                 </div>
               </AnimatedSection>
             </div>
@@ -492,12 +495,12 @@ export default function Home() {
                   {
                     name: "Σχετικά με εμάς",
                     Icon: Users,
-                    href: "#εταιρεια"
+                    href: "/aboutUs"
                   },
                   {
                     name: "Η Ιστορία μας",
                     Icon: FileText,
-                    href: "#ιστορια"
+                    href: "/aboutUs"
                   },
                   {
                     name: "Πιστοποιήσεις",

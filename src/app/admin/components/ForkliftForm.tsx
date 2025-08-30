@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import type { ForkliftWithDetails } from '@/lib/admin-queries'
 import ImageUpload from './ImageUpload'
-import ImagePreview, { type ImageData } from './ImagePreview'
+import EnhancedImagePreview from './EnhancedImagePreview'
 import ImageSelector, { type SelectedImageFile } from './ImageSelector'
-import { deleteImage, extractStoragePath, type ImageUploadResult } from '@/lib/storage'
+import { type ImageUploadResult } from '@/lib/storage'
+import type { ImageData } from '../../hooks/useImageManager'
 
 interface Brand {
   id: number
@@ -92,10 +93,8 @@ export default function ForkliftForm({
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isLoadingOptions, setIsLoadingOptions] = useState(true)
   
-  // For editing: existing uploaded images
+  // For editing: existing uploaded images (will be passed to EnhancedImagePreview)
   const [images, setImages] = useState<ImageData[]>([])
-  const [isImageLoading, setIsImageLoading] = useState(false)
-  const [imageError, setImageError] = useState('')
 
   // For creation: locally selected images
   const [selectedImages, setSelectedImages] = useState<SelectedImageFile[]>([])
@@ -171,6 +170,8 @@ export default function ForkliftForm({
       })
       
       // Load existing images if editing
+      console.log('ForkliftForm Debug - initialData:', initialData, 'isEditing:', isEditing)
+      console.log('ForkliftForm Debug - initialData.images:', initialData.images)
       if (initialData.images) {
         const imageData: ImageData[] = initialData.images.map((img, index) => ({
           id: img.id,
@@ -313,140 +314,32 @@ export default function ForkliftForm({
   }
 
   // Image management handlers for editing mode
-  const handleImageUploadComplete = async (results: ImageUploadResult[]) => {
-    try {
-      // Reload forklift data to get updated images from database
-      if (initialData?.id) {
+
+  const handleImagesChange = (updatedImages: ImageData[]) => {
+    setImages(updatedImages)
+  }
+
+  const handleImageOperationComplete = async () => {
+    // Reload forklift data to get updated images after delete operations
+    if (initialData?.id) {
+      try {
         const response = await fetch(`/api/admin/forklifts?id=${initialData.id}`)
         const result = await response.json()
         
-        if (result.success && result.data) {
-          setImages(result.data.images || [])
-        } else {
-          // Fallback: add basic image data to state
-          const newImages: ImageData[] = results.map((result, index) => ({
-            image_url: result.url,
-            is_primary: images.length === 0 && index === 0,
-            sort_order: images.length + index
+        if (result.success && result.data && result.data.images) {
+          const imageData: ImageData[] = result.data.images.map((img: any, index: number) => ({
+            id: img.id,
+            image_url: img.image_url,
+            alt_text: img.alt_text || undefined,
+            is_primary: img.is_primary || false,
+            sort_order: img.sort_order || index
           }))
-          setImages(prev => [...prev, ...newImages])
+          setImages(imageData)
         }
-      } else {
-        // Fallback: add basic image data to state
-        const newImages: ImageData[] = results.map((result, index) => ({
-          image_url: result.url,
-          is_primary: images.length === 0 && index === 0,
-          sort_order: images.length + index
-        }))
-        setImages(prev => [...prev, ...newImages])
+      } catch (error) {
+        console.error('Error reloading forklift data:', error)
       }
-    } catch (error) {
-      // Fallback: add basic image data to state
-      const newImages: ImageData[] = results.map((result, index) => ({
-        image_url: result.url,
-        is_primary: images.length === 0 && index === 0,
-        sort_order: images.length + index
-      }))
-      setImages(prev => [...prev, ...newImages])
     }
-    
-    setImageError('')
-    setIsImageLoading(false) // Make sure to clear loading state
-  }
-
-  const handleImageUploadStart = () => {
-    setIsImageLoading(true)
-    setImageError('')
-  }
-
-  const handleImageUploadError = (error: string) => {
-    setImageError(error)
-    setIsImageLoading(false)
-  }
-
-  const handleSetPrimaryImage = async (imageUrl: string) => {
-    try {
-      setIsImageLoading(true)
-      
-      // Update in database
-      const response = await fetch('/api/admin/forklift-images/set-primary', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          forklift_id: initialData?.id,
-          primary_image_url: imageUrl
-        })
-      })
-
-      const result = await response.json()
-      
-      if (result.success) {
-        // Update local state
-        setImages(prev => prev.map(img => ({
-          ...img,
-          is_primary: img.image_url === imageUrl
-        })))
-        setImageError('')
-      } else {
-        setImageError(result.message || 'Σφάλμα ενημέρωσης κύριας εικόνας')
-      }
-    } catch (error) {
-      console.error('Error setting primary image:', error)
-      setImageError('Σφάλμα σύνδεσης κατά την ενημέρωση κύριας εικόνας')
-    } finally {
-      setIsImageLoading(false)
-    }
-  }
-
-  const handleDeleteImage = async (imageUrl: string) => {
-    try {
-      setIsImageLoading(true)
-      
-      // First, delete metadata from database
-      const deleteResponse = await fetch('/api/admin/forklift-images', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ image_url: imageUrl })
-      })
-
-      const deleteResult = await deleteResponse.json()
-      if (!deleteResult.success) {
-        throw new Error(deleteResult.message || 'Σφάλμα διαγραφής metadata εικόνας')
-      }
-      
-      // Then delete from storage
-      const storagePath = extractStoragePath(imageUrl)
-      if (storagePath) {
-        await deleteImage(storagePath)
-      }
-      
-      // Remove from state
-      setImages(prev => {
-        const filtered = prev.filter(img => img.image_url !== imageUrl)
-        
-        // If we deleted the primary image, make the first remaining image primary
-        if (filtered.length > 0 && !filtered.some(img => img.is_primary)) {
-          filtered[0].is_primary = true
-        }
-        
-        return filtered
-      })
-      
-      setImageError('')
-    } catch (error) {
-      console.error('Error deleting image:', error)
-      setImageError(error instanceof Error ? error.message : 'Σφάλμα διαγραφής εικόνας')
-    } finally {
-      setIsImageLoading(false)
-    }
-  }
-
-  const handleViewImage = (imageUrl: string) => {
-    window.open(imageUrl, '_blank')
   }
 
   // Clean up object URLs on unmount
@@ -764,29 +657,21 @@ export default function ForkliftForm({
           <h3 className="text-lg font-medium text-white mb-4">
             Εικόνες Κλαρκ
           </h3>
-          
-          {/* Error message */}
-          {imageError && (
-            <div className="mb-4 bg-red-500/20 border border-red-500/30 rounded-lg p-4">
-              <p className="text-red-400 text-sm">{imageError}</p>
-            </div>
-          )}
 
           {isEditing ? (
             // Editing mode: Show uploaded images + upload new ones
             <>
-              {/* Existing images */}
+              {/* Existing images with enhanced management */}
               {images.length > 0 && (
                 <div className="mb-6">
                   <h4 className="text-sm font-medium text-neutral-300 mb-3">Υπάρχουσες εικόνες</h4>
-                  <ImagePreview
-                    images={images}
-                    onSetPrimary={handleSetPrimaryImage}
-                    onDelete={handleDeleteImage}
-                    onView={handleViewImage}
+                  <EnhancedImagePreview
+                    forkliftId={initialData?.id}
+                    initialImages={images}
                     maxImages={3}
-                    isLoading={isImageLoading}
                     disabled={isLoading}
+                    onImagesChange={handleImagesChange}
+                    onOperationComplete={handleImageOperationComplete}
                   />
                 </div>
               )}
@@ -800,9 +685,7 @@ export default function ForkliftForm({
                   forkliftId={initialData?.id}
                   maxFiles={3}
                   existingImagesCount={images.length}
-                  onUploadComplete={handleImageUploadComplete}
-                  onUploadStart={handleImageUploadStart}
-                  onUploadError={handleImageUploadError}
+                  onUploadComplete={handleImageOperationComplete}
                   disabled={isLoading}
                 />
               </div>
