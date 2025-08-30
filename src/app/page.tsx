@@ -537,7 +537,7 @@ export default function Home() {
                 ]
               }
             ]}
-            copyright="© 2024 Κλαρκ Ανταλλακτικά. Όλα τα δικαιώματα διατηρούνται."
+            copyright="© 2025 Κλαρκ Ανταλλακτικά. Όλα τα δικαιώματα διατηρούνται."
           />
         </AnimatedSection>
       </div>
