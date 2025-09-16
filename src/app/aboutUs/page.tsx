@@ -5,6 +5,7 @@ import AnimatedSection from "../components/AnimatedSection";
 import { Footer } from "../components/Footer";
 import GradientText from '../components/GradientText';
 import { Particles } from "../components/ui/particles";
+import DynamicContent from '@/components/DynamicContent';
 import { 
   Wrench, 
   Truck, 
@@ -51,24 +52,32 @@ export default function AboutUs() {
                   showBorder={false}
                   className="font-medium"
                 >
-                  Σχετικά με εμάς
+                  <DynamicContent
+                    contentKey="about_hero_badge"
+                    fallback="Σχετικά με εμάς"
+                    as="span"
+                  />
                 </GradientText>
               </span>
             </AnimatedSection>
 
             <AnimatedSection animation="slideInUp" delay={400} pageId="aboutUs">
-              <h1 className="font-open-sans font-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight text-white mb-6">
-                Η Ιστορία του
-                <br />
-                <span className="text-indigo-400">Κλαρκ</span>
-              </h1>
+              <DynamicContent
+                contentKey="about_hero_title"
+                fallback="Η Ιστορία του<br /><span class=&quot;text-indigo-400&quot;>Κλαρκ</span>"
+                as="h1"
+                className="font-open-sans font-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight text-white mb-6"
+                isHtml={true}
+              />
             </AnimatedSection>
 
             <AnimatedSection animation="slideInUp" delay={600} pageId="aboutUs">
-              <p className="font-open-sans text-lg sm:text-xl lg:text-2xl text-gray-300 mb-8 leading-relaxed max-w-3xl mx-auto">
-                Από το 1995 στην υπηρεσία των επιχειρήσεων, προσφέρουμε ποιοτικά ανταλλακτικά 
-                και αξιόπιστες λύσεις που στηρίζουν την ανάπτυξη και την επιτυχία των πελατών μας.
-              </p>
+              <DynamicContent
+                contentKey="about_hero_subtitle"
+                fallback="Από το 1995 στην υπηρεσία των επιχειρήσεων, προσφέρουμε ποιοτικά ανταλλακτικά και αξιόπιστες λύσεις που στηρίζουν την ανάπτυξη και την επιτυχία των πελατών μας."
+                as="p"
+                className="font-open-sans text-lg sm:text-xl lg:text-2xl text-gray-300 mb-8 leading-relaxed max-w-3xl mx-auto"
+              />
             </AnimatedSection>
           </div>
         </section>
@@ -77,12 +86,18 @@ export default function AboutUs() {
         <section className="w-full py-20 px-6 sm:px-12 lg:px-16 xl:px-20">
           <div className="max-w-7xl mx-auto">
             <AnimatedSection animation="slideInUp" className="text-center mb-16" pageId="aboutUs">
-              <h2 className="font-open-sans font-bold text-3xl sm:text-4xl lg:text-5xl text-white mb-6">
-                Οι Αξίες μας
-              </h2>
-              <p className="font-open-sans text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto">
-                Καθοδηγούμαστε από αξίες που εμπνέουν την καθημερινή μας δουλειά και τη σχέση μας με τους πελάτες
-              </p>
+              <DynamicContent
+                contentKey="about_values_title"
+                fallback="Οι Αξίες μας"
+                as="h2"
+                className="font-open-sans font-bold text-3xl sm:text-4xl lg:text-5xl text-white mb-6"
+              />
+              <DynamicContent
+                contentKey="about_values_subtitle"
+                fallback="Καθοδηγούμαστε από αξίες που εμπνέουν την καθημερινή μας δουλειά και τη σχέση μας με τους πελάτες"
+                as="p"
+                className="font-open-sans text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto"
+              />
             </AnimatedSection>
 
             <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
@@ -92,13 +107,18 @@ export default function AboutUs() {
                   <div className="w-16 h-16 bg-indigo-500 rounded-full flex items-center justify-center mx-auto mb-6">
                     <Award className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="font-open-sans font-bold text-2xl text-white mb-4">
-                    Ποιότητα
-                  </h3>
-                  <p className="font-open-sans text-gray-300 leading-relaxed">
-                    Προσφέρουμε μόνο ανταλλακτικά άριστης ποιότητας που εγγυώνται 
-                    μακροχρόνια απόδοση και αξιοπιστία.
-                  </p>
+                  <DynamicContent
+                    contentKey="about_quality_title"
+                    fallback="Ποιότητα"
+                    as="h3"
+                    className="font-open-sans font-bold text-2xl text-white mb-4"
+                  />
+                  <DynamicContent
+                    contentKey="about_quality_desc"
+                    fallback="Προσφέρουμε μόνο ανταλλακτικά άριστης ποιότητας που εγγυώνται μακροχρόνια απόδοση και αξιοπιστία."
+                    as="p"
+                    className="font-open-sans text-gray-300 leading-relaxed"
+                  />
                 </div>
               </AnimatedSection>
 

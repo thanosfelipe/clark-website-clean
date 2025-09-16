@@ -31,6 +31,10 @@ type ForkliftImage = Tables['forklift_images']['Row']
 type ForkliftImageInsert = Tables['forklift_images']['Insert']
 type ForkliftImageUpdate = Tables['forklift_images']['Update']
 
+export type ContentItem = Tables['content_items']['Row']
+export type ContentItemInsert = Tables['content_items']['Insert']
+export type ContentItemUpdate = Tables['content_items']['Update']
+
 // Extended types for joined data
 export interface ForkliftWithDetails extends Forklift {
   brand?: Brand | null
@@ -826,6 +830,136 @@ export const validation = {
       errors.push('Η ποσότητα αποθέματος δεν μπορεί να είναι αρνητική')
     }
     
+    return errors
+  }
+}
+
+// ============================================================================
+// CONTENT ITEMS QUERIES
+// ============================================================================
+
+export const contentQueries = {
+  // Get all content items
+  async getAll(): Promise<ContentItem[]> {
+    const { data, error } = await supabase
+      .from('content_items')
+      .select('*')
+      .order('page', { ascending: true })
+      .order('content_key', { ascending: true })
+
+    if (error) handleDatabaseError(error)
+    return data || []
+  },
+
+  // Get content items by page
+  async getByPage(page: string): Promise<ContentItem[]> {
+    const { data, error } = await supabase
+      .from('content_items')
+      .select('*')
+      .eq('page', page)
+      .eq('is_active', true)
+      .order('content_key')
+
+    if (error) handleDatabaseError(error)
+    return data || []
+  },
+
+  // Get content item by key
+  async getByKey(contentKey: string): Promise<ContentItem | null> {
+    const { data, error } = await supabase
+      .from('content_items')
+      .select('*')
+      .eq('content_key', contentKey)
+      .single()
+
+    if (error && error.code !== 'PGRST116') handleDatabaseError(error)
+    return data || null
+  },
+
+  // Get content item by ID
+  async getById(id: number): Promise<ContentItem | null> {
+    const { data, error } = await supabase
+      .from('content_items')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (error && error.code !== 'PGRST116') handleDatabaseError(error)
+    return data || null
+  },
+
+  // Create content item
+  async create(content: ContentItemInsert): Promise<ContentItem> {
+    const { data, error } = await supabase
+      .from('content_items')
+      .insert(content)
+      .select()
+      .single()
+
+    if (error) handleDatabaseError(error)
+    return data
+  },
+
+  // Update content item
+  async update(id: number, updates: ContentItemUpdate): Promise<ContentItem> {
+    const { data, error } = await supabase
+      .from('content_items')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) handleDatabaseError(error)
+    return data
+  },
+
+  // Update content by key
+  async updateByKey(contentKey: string, contentValue: string): Promise<ContentItem> {
+    const { data, error } = await supabase
+      .from('content_items')
+      .update({ content_value: contentValue, updated_at: new Date().toISOString() })
+      .eq('content_key', contentKey)
+      .select()
+      .single()
+
+    if (error) handleDatabaseError(error)
+    return data
+  },
+
+  // Delete content item
+  async delete(id: number): Promise<void> {
+    const { error } = await supabase
+      .from('content_items')
+      .delete()
+      .eq('id', id)
+
+    if (error) handleDatabaseError(error)
+  },
+
+  // Validation function
+  validateContentItem(data: ContentItemInsert | ContentItemUpdate): string[] {
+    const errors: string[] = []
+
+    if ('content_key' in data && !data.content_key?.trim()) {
+      errors.push('Το κλειδί περιεχομένου είναι υποχρεωτικό')
+    }
+
+    if ('content_key' in data && data.content_key && data.content_key.length > 255) {
+      errors.push('Το κλειδί περιεχομένου δεν μπορεί να υπερβαίνει τους 255 χαρακτήρες')
+    }
+
+    if ('content_value' in data && !data.content_value?.trim()) {
+      errors.push('Η τιμή περιεχομένου είναι υποχρεωτική')
+    }
+
+    if ('page' in data && data.page && data.page.length > 100) {
+      errors.push('Η σελίδα δεν μπορεί να υπερβαίνει τους 100 χαρακτήρες')
+    }
+
+    if ('content_type' in data && data.content_type && data.content_type.length > 50) {
+      errors.push('Ο τύπος περιεχομένου δεν μπορεί να υπερβαίνει τους 50 χαρακτήρες')
+    }
+
     return errors
   }
 }

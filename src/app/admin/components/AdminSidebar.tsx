@@ -11,7 +11,8 @@ import {
   FireIcon,
   ArrowRightOnRectangleIcon,
   HomeIcon,
-  ChartBarIcon
+  ChartBarIcon,
+  DocumentTextIcon
 } from '@heroicons/react/24/outline'
 
 interface AdminSidebarProps {
@@ -29,7 +30,8 @@ interface NavItem {
 const navigation: NavItem[] = [
   { name: 'Dashboard', href: '/admin', icon: HomeIcon, label: 'Dashboard' },
   { name: 'Κλαρκ', href: '/admin/forklifts', icon: TruckIcon, label: 'Κλαρκ' },
-  { name: 'Μάρκες', href: '/admin/brands', icon: TagIcon, label: 'Μάρκες' }
+  { name: 'Μάρκες', href: '/admin/brands', icon: TagIcon, label: 'Μάρκες' },
+  { name: 'Περιεχόμενο', href: '/admin/content', icon: DocumentTextIcon, label: 'Περιεχόμενο' }
 ]
 
 export default function AdminSidebar({ isOpen, setIsOpen }: AdminSidebarProps) {
