@@ -3,6 +3,7 @@
 import * as React from "react";
 import { cn } from "../../lib/utils";
 import { LucideIcon } from "lucide-react";
+import DynamicContent from "@/components/DynamicContent";
 
 interface SocialLink {
   name: string;
@@ -42,11 +43,18 @@ export const Footer = React.forwardRef<HTMLDivElement, FooterProps>(
           <div className="grid grid-cols-1 lg:grid-cols-12">
             <div className="lg:col-span-4">
               <a href="#" className="text-xl font-open-sans font-semibold text-white">
-                {brand.name}
+                <DynamicContent
+                  contentKey="footer_brand_name"
+                  fallback={brand.name}
+                  as="span"
+                />
               </a>
-              <p className="text-sm text-gray-300 mt-4 leading-relaxed font-open-sans">
-                {brand.description}
-              </p>
+              <DynamicContent
+                contentKey="footer_brand_desc"
+                fallback={brand.description}
+                as="p"
+                className="text-sm text-gray-300 mt-4 leading-relaxed font-open-sans"
+              />
 
               <p className="text-sm font-open-sans text-gray-400 mt-6">
                 {socialLinks.map((link, index) => (
@@ -68,7 +76,14 @@ export const Footer = React.forwardRef<HTMLDivElement, FooterProps>(
             <div className="grid grid-cols-2 mt-16 md:grid-cols-3 lg:col-span-8 lg:justify-items-end lg:mt-0">
               {columns.map(({ title, links }) => (
                 <div key={title} className="last:mt-12 md:last:mt-0">
-                  <h3 className="text-sm font-open-sans font-semibold text-white mb-4">{title}</h3>
+                  <DynamicContent
+                    contentKey={title === "Προϊόντα & Υπηρεσίες" ? "footer_products_title" :
+                                title === "Εταιρεία" ? "footer_company_title" :
+                                title === "Επικοινωνία" ? "footer_contact_title" : ""}
+                    fallback={title}
+                    as="h3"
+                    className="text-sm font-open-sans font-semibold text-white mb-4"
+                  />
                   <ul className="mt-4 space-y-3">
                     {links.map(({ name, Icon, href }) => (
                       <li key={name}>
@@ -89,7 +104,12 @@ export const Footer = React.forwardRef<HTMLDivElement, FooterProps>(
 
           {copyright && (
             <div className="mt-20 border-t border-indigo-800/30 pt-6 pb-8">
-              <p className="text-xs font-open-sans text-gray-500">{copyright}</p>
+              <DynamicContent
+                contentKey="footer_copyright"
+                fallback={copyright}
+                as="p"
+                className="text-xs font-open-sans text-gray-500"
+              />
             </div>
           )}
         </div>

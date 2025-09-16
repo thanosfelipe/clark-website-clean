@@ -95,6 +95,42 @@ export type Database = {
         }
         Relationships: []
       }
+      content_items: {
+        Row: {
+          id: number
+          content_key: string
+          content_value: string
+          description: string | null
+          page: string | null
+          content_type: string | null
+          is_active: boolean | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: number
+          content_key: string
+          content_value: string
+          description?: string | null
+          page?: string | null
+          content_type?: string | null
+          is_active?: boolean | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: number
+          content_key?: string
+          content_value?: string
+          description?: string | null
+          page?: string | null
+          content_type?: string | null
+          is_active?: boolean | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       forklift_images: {
         Row: {
           alt_text: string | null
@@ -520,6 +556,7 @@ export type Subcategory = Tables<'subcategories'>
 export type FuelType = Tables<'fuel_types'>
 export type MastType = Tables<'mast_types'>
 export type ForkliftImage = Tables<'forklift_images'>
+export type ContentItem = Tables<'content_items'>
 
 // Search function return type
 export type SearchForkliftResult = Database['public']['Functions']['search_forklifts']['Returns'][0]

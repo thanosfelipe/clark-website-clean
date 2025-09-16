@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Navigation from '../components/Navigation'
 import { Footer } from '../components/Footer'
 import AnimatedSection from '../components/AnimatedSection'
+import DynamicContent from '@/components/DynamicContent'
 import { 
   Phone, 
   Mail, 
@@ -49,13 +50,18 @@ const ContactPage = () => {
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <AnimatedSection animation="fadeIn" className="text-center mb-16" pageId="contact">
-              <h1 className="font-open-sans font-bold text-4xl sm:text-5xl lg:text-6xl text-white mb-6">
-                ΕΠΙΚΟΙΝΩΝΙΑ
-              </h1>
-              <p className="font-open-sans text-lg text-gray-300 max-w-2xl mx-auto">
-                Αν έχετε οποιεσδήποτε ερωτήσεις, παρακαλώ μη διστάσετε να επικοινωνήσετε μαζί μας μέσω 
-                τηλεφώνου, email, της φόρμας παρακάτω ή ακόμα και μέσω social media!
-              </p>
+              <DynamicContent
+                contentKey="contact_page_title"
+                fallback="ΕΠΙΚΟΙΝΩΝΙΑ"
+                as="h1"
+                className="font-open-sans font-bold text-4xl sm:text-5xl lg:text-6xl text-white mb-6"
+              />
+              <DynamicContent
+                contentKey="contact_page_subtitle"
+                fallback="Αν έχετε οποιεσδήποτε ερωτήσεις, παρακαλώ μη διστάσετε να επικοινωνήσετε μαζί μας μέσω τηλεφώνου, email, της φόρμας παρακάτω ή ακόμα και μέσω social media!"
+                as="p"
+                className="font-open-sans text-lg text-gray-300 max-w-2xl mx-auto"
+              />
             </AnimatedSection>
 
             {/* Contact Content */}
@@ -63,16 +69,22 @@ const ContactPage = () => {
               {/* Contact Form */}
               <AnimatedSection animation="slideInLeft" delay={200} pageId="contact">
                 <div className="bg-gradient-to-br from-gray-900/60 to-gray-800/40 border border-indigo-800/50 rounded-2xl p-8 backdrop-blur-sm">
-                  <h2 className="font-open-sans font-bold text-2xl text-white mb-6">
-                    ΕΠΙΚΟΙΝΩΝΗΣΤΕ ΜΑΖΙ ΜΑΣ
-                  </h2>
+                  <DynamicContent
+                    contentKey="contact_form_title"
+                    fallback="ΕΠΙΚΟΙΝΩΝΗΣΤΕ ΜΑΖΙ ΜΑΣ"
+                    as="h2"
+                    className="font-open-sans font-bold text-2xl text-white mb-6"
+                  />
                   
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block font-open-sans text-sm font-medium text-gray-300 mb-2">
-                          ΟΝΟΜΑ
-                        </label>
+                        <DynamicContent
+                          contentKey="contact_form_name_label"
+                          fallback="ΟΝΟΜΑ"
+                          as="label"
+                          className="block font-open-sans text-sm font-medium text-gray-300 mb-2"
+                        />
                         <input
                           type="text"
                           name="name"
@@ -84,9 +96,12 @@ const ContactPage = () => {
                         />
                       </div>
                       <div>
-                        <label className="block font-open-sans text-sm font-medium text-gray-300 mb-2">
-                          ΤΗΛΕΦΩΝΟ
-                        </label>
+                        <DynamicContent
+                          contentKey="contact_form_phone_label"
+                          fallback="ΤΗΛΕΦΩΝΟ"
+                          as="label"
+                          className="block font-open-sans text-sm font-medium text-gray-300 mb-2"
+                        />
                         <input
                           type="tel"
                           name="phone"
@@ -100,9 +115,12 @@ const ContactPage = () => {
                     </div>
                     
                     <div>
-                      <label className="block font-open-sans text-sm font-medium text-gray-300 mb-2">
-                        EMAIL
-                      </label>
+                      <DynamicContent
+                        contentKey="contact_form_email_label"
+                        fallback="EMAIL"
+                        as="label"
+                        className="block font-open-sans text-sm font-medium text-gray-300 mb-2"
+                      />
                       <input
                         type="email"
                         name="email"
@@ -115,9 +133,12 @@ const ContactPage = () => {
                     </div>
                     
                     <div>
-                      <label className="block font-open-sans text-sm font-medium text-gray-300 mb-2">
-                        ΤΟ ΜΗΝΥΜΑ ΣΑΣ
-                      </label>
+                      <DynamicContent
+                        contentKey="contact_form_message_label"
+                        fallback="ΜΗΝΥΜΑ"
+                        as="label"
+                        className="block font-open-sans text-sm font-medium text-gray-300 mb-2"
+                      />
                       <textarea
                         name="message"
                         value={formData.message}
@@ -134,7 +155,11 @@ const ContactPage = () => {
                       className="w-full bg-indigo-500 hover:bg-indigo-600 text-white px-8 py-4 rounded-lg font-open-sans font-medium transition-colors duration-200 flex items-center justify-center gap-2"
                     >
                       <Send className="w-5 h-5" />
-                      ΣΤΕΙΛΤΕ ΜΗΝΥΜΑ
+                      <DynamicContent
+                        contentKey="contact_form_submit_button"
+                        fallback="ΑΠΟΣΤΟΛΗ ΜΗΝΥΜΑΤΟΣ"
+                        as="span"
+                      />
                     </button>
                   </form>
                 </div>
