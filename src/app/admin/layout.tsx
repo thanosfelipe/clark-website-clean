@@ -28,8 +28,17 @@ export default function AdminLayout({
         return
       }
 
+      // Set a failsafe timeout to prevent infinite loading
+      const failsafeTimeout = setTimeout(() => {
+        console.error('Auth check taking too long, redirecting to login')
+        setIsLoading(false)
+        router.replace('/admin/login')
+      }, 15000) // 15 seconds failsafe
+
       try {
         const currentUser = await getCurrentUser()
+        clearTimeout(failsafeTimeout)
+
         if (!currentUser) {
           console.log('No current user found, redirecting to login')
           setUser(null)
@@ -38,14 +47,14 @@ export default function AdminLayout({
           return
         }
         setUser(currentUser)
+        setIsLoading(false)
       } catch (error) {
+        clearTimeout(failsafeTimeout)
         console.error('Error checking auth:', error)
         setUser(null)
         setIsLoading(false)
         router.replace('/admin/login')
         return
-      } finally {
-        setIsLoading(false)
       }
     }
 

@@ -5,7 +5,21 @@ import type { Database } from './database.types'
 const supabaseUrl = 'https://aifgbbgclcukazrwezwk.supabase.co'
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpZmdiYmdjbGN1a2F6cndlendrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIwOTEzMTQsImV4cCI6MjA2NzY2NzMxNH0.HyjW5fgF6H1NjoOUJUX87NOUdWSG6c9C5Y4DTjvLyZQ'
 
-export const supabaseAuth = createClient<Database>(supabaseUrl, supabaseAnonKey)
+export const supabaseAuth = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  },
+  global: {
+    fetch: (url, options = {}) => {
+      return fetch(url, {
+        ...options,
+        signal: AbortSignal.timeout(8000), // 8 second timeout for all requests
+      })
+    }
+  }
+})
 
 // Auth types
 export interface AdminUser {
@@ -84,53 +98,68 @@ export async function logoutAdmin(): Promise<void> {
   await supabaseAuth.auth.signOut()
 }
 
-// Get current session
+// Get current session with timeout
 export async function getCurrentUser(): Promise<AdminUser | null> {
   try {
-    const { data: { session } } = await supabaseAuth.auth.getSession()
-    
-    if (!session?.user) {
-      console.log('No session found')
-      return null
-    }
+    // Add timeout wrapper for production stability
+    const timeoutPromise = new Promise<AdminUser | null>((_, reject) => {
+      setTimeout(() => reject(new Error('Auth check timeout')), 10000) // 10 second timeout
+    })
 
-    // Check if session has expired
-    if (isSessionExpired()) {
-      console.log('Session expired, logging out')
-      // Clear storage immediately but don't call full logout to avoid loops
-      clearSessionStorage()
-      await supabaseAuth.auth.signOut()
-      return null
-    }
+    const authCheckPromise = (async (): Promise<AdminUser | null> => {
+      const { data: { session }, error: sessionError } = await supabaseAuth.auth.getSession()
 
-    // Verify user is still active admin
-    const { data: adminUser, error } = await supabaseAuth
-      .from('admin_users')
-      .select('id, email, name, role, is_active')
-      .eq('email', session.user.email || '')
-      .eq('is_active', true)
-      .single()
+      if (sessionError) {
+        console.error('Session error:', sessionError.message)
+        return null
+      }
 
-    if (error || !adminUser) {
-      console.log('User not found in admin_users or not active:', error?.message)
-      // Clear storage and sign out
-      clearSessionStorage()
-      await supabaseAuth.auth.signOut()
-      return null
-    }
+      if (!session?.user) {
+        console.log('No session found')
+        return null
+      }
 
-    // Update activity on successful auth check
-    updateLastActivity()
+      // Check if session has expired
+      if (isSessionExpired()) {
+        console.log('Session expired, logging out')
+        // Clear storage immediately but don't call full logout to avoid loops
+        clearSessionStorage()
+        await supabaseAuth.auth.signOut()
+        return null
+      }
 
-    return {
-      id: adminUser.id.toString(),
-      email: adminUser.email,
-      name: adminUser.name || '',
-      role: adminUser.role || 'admin',
-      is_active: adminUser.is_active || false
-    }
+      // Verify user is still active admin
+      const { data: adminUser, error } = await supabaseAuth
+        .from('admin_users')
+        .select('id, email, name, role, is_active')
+        .eq('email', session.user.email || '')
+        .eq('is_active', true)
+        .single()
+
+      if (error || !adminUser) {
+        console.log('User not found in admin_users or not active:', error?.message)
+        // Clear storage and sign out
+        clearSessionStorage()
+        await supabaseAuth.auth.signOut()
+        return null
+      }
+
+      // Update activity on successful auth check
+      updateLastActivity()
+
+      return {
+        id: adminUser.id.toString(),
+        email: adminUser.email,
+        name: adminUser.name || '',
+        role: adminUser.role || 'admin',
+        is_active: adminUser.is_active || false
+      }
+    })()
+
+    return await Promise.race([authCheckPromise, timeoutPromise])
   } catch (error) {
     console.error('Error in getCurrentUser:', error)
+    // If it's a timeout or network error, return null to redirect to login
     return null
   }
 }
